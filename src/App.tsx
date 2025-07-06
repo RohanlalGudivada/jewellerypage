@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Gem, ArrowLeft, Calendar, DollarSign } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Gem, ArrowLeft, Calendar, DollarSign, Camera, Download } from 'lucide-react';
 
 interface RateData {
   date: string;
@@ -14,6 +14,7 @@ function App() {
     goldPrice: 0,
     silverPrice: 0
   });
+  const screenshotRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +38,37 @@ function App() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB');
+  };
+
+  const handleScreenshot = async () => {
+    if (!screenshotRef.current) return;
+
+    try {
+      // Dynamically import html2canvas
+      const html2canvas = (await import('html2canvas')).default;
+      
+      const canvas = await html2canvas(screenshotRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2, // Higher quality
+        useCORS: true,
+        allowTaint: true,
+        width: screenshotRef.current.scrollWidth,
+        height: screenshotRef.current.scrollHeight,
+      });
+
+      // Create download link
+      const link = document.createElement('a');
+      link.download = `balaji-jewellery-rates-${formatDate(formData.date).replace(/\//g, '-')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Screenshot failed:', error);
+      alert('Screenshot failed. Please try again.');
+    }
   };
 
   return (
@@ -158,65 +190,106 @@ function App() {
           </div>
         ) : (
           /* Display Section */
-          <div className="bg-white rounded-xl shadow-xl p-8 border border-gray-200">
-            <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold text-gray-800 font-roboto mb-2">
-                Current Rates
-              </h3>
-              <p className="text-lg text-gray-600 font-telugu">
-                ప్రస్తుత ధరలు
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* English Column */}
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
-                <h4 className="text-xl font-bold text-blue-800 mb-4 font-roboto text-center">
-                  English
-                </h4>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
-                    <span className="font-bold text-gray-700 font-roboto">Date:</span>
-                    <span className="text-gray-600 font-roboto">{formatDate(formData.date)}</span>
+          <div className="space-y-6">
+            {/* Screenshot Area */}
+            <div ref={screenshotRef} className="bg-white rounded-xl shadow-xl p-8 border border-gray-200">
+              {/* Header for Screenshot */}
+              <div className="text-center mb-8 border-b border-gray-200 pb-6">
+                <div className="flex items-center justify-center mb-4">
+                  <Gem className="text-amber-600 mr-3" size={28} />
+                  <div className="text-center">
+                    <h1 className="text-2xl font-bold text-gray-800 font-roboto">
+                      Balaji Jewellery Mart
+                    </h1>
+                    <h2 className="text-xl font-bold text-gray-700 font-telugu">
+                      బాలాజీ జ్యువెల్లరీ మార్ట్
+                    </h2>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
-                    <span className="font-bold text-gray-700 font-roboto">Gold Price (8 grams, 22 Carat):</span>
-                    <span className="text-amber-600 font-bold font-roboto">₹{formData.goldPrice.toLocaleString()}</span>
+                </div>
+                <div className="text-center space-y-1">
+                  <div className="text-sm text-gray-600 font-roboto">
+                    Main Road, Nuzvid, 521201 | Call: 9440635925
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
-                    <span className="font-bold text-gray-700 font-roboto">Silver Price (10 grams):</span>
-                    <span className="text-gray-600 font-bold font-roboto">₹{formData.silverPrice.toLocaleString()}</span>
+                  <div className="text-sm text-gray-600 font-telugu">
+                    మైన్ రోడ్, నూజివిడ్, 521201 | కాల్: 9440635925
                   </div>
                 </div>
               </div>
 
-              {/* Telugu Column */}
-              <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl border border-amber-200">
-                <h4 className="text-xl font-bold text-amber-800 mb-4 font-telugu text-center">
-                  తెలుగు
-                </h4>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
-                    <span className="font-bold text-gray-700 font-telugu">తేదీ:</span>
-                    <span className="text-gray-600 font-telugu">{formatDate(formData.date)}</span>
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-bold text-gray-800 font-roboto mb-1">
+                  Today's Gold & Silver Rates
+                </h3>
+                <p className="text-lg text-gray-600 font-telugu">
+                  నేటి బంగారం మరియు వెండి ధరలు
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* English Column */}
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
+                  <h4 className="text-lg font-bold text-blue-800 mb-4 font-roboto text-center">
+                    English
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
+                      <span className="font-bold text-gray-700 font-roboto text-sm">Date:</span>
+                      <span className="text-gray-600 font-roboto text-sm">{formatDate(formData.date)}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
+                      <span className="font-bold text-gray-700 font-roboto text-sm">Gold (8g, 22K):</span>
+                      <span className="text-amber-600 font-bold font-roboto">₹{formData.goldPrice.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
+                      <span className="font-bold text-gray-700 font-roboto text-sm">Silver (10g):</span>
+                      <span className="text-gray-600 font-bold font-roboto">₹{formData.silverPrice.toLocaleString()}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
-                    <span className="font-bold text-gray-700 font-telugu">బంగారం ధర (8 గ్రాములు, 22 క్యారెట్):</span>
-                    <span className="text-amber-600 font-bold font-telugu">₹{formData.goldPrice.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
-                    <span className="font-bold text-gray-700 font-telugu">వెండి ధర (10 గ్రాములు):</span>
-                    <span className="text-gray-600 font-bold font-telugu">₹{formData.silverPrice.toLocaleString()}</span>
+                </div>
+
+                {/* Telugu Column */}
+                <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl border border-amber-200">
+                  <h4 className="text-lg font-bold text-amber-800 mb-4 font-telugu text-center">
+                    తెలుగు
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
+                      <span className="font-bold text-gray-700 font-telugu text-sm">తేదీ:</span>
+                      <span className="text-gray-600 font-telugu text-sm">{formatDate(formData.date)}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
+                      <span className="font-bold text-gray-700 font-telugu text-sm">బంగారం (8గ్రా, 22క్యా):</span>
+                      <span className="text-amber-600 font-bold font-telugu">₹{formData.goldPrice.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
+                      <span className="font-bold text-gray-700 font-telugu text-sm">వెండి (10గ్రా):</span>
+                      <span className="text-gray-600 font-bold font-telugu">₹{formData.silverPrice.toLocaleString()}</span>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {/* Footer for Screenshot */}
+              <div className="text-center mt-6 pt-4 border-t border-gray-200">
+                <p className="text-xs text-gray-500 font-roboto">
+                  Visit us for the best jewelry collection | అత్యుత్తమ ఆభరణాల కోసం మా వద్దకు రండి
+                </p>
+              </div>
             </div>
 
-            {/* Back Button */}
-            <div className="mt-8 text-center">
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={handleScreenshot}
+                className="inline-flex items-center justify-center bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-3 px-6 rounded-lg hover:from-green-600 hover:to-green-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl font-roboto"
+              >
+                <Camera className="mr-2" size={20} />
+                Download Screenshot / స్క్రీన్‌షాట్ డౌన్‌లోడ్
+              </button>
+              
               <button
                 onClick={handleGoBack}
-                className="inline-flex items-center bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl font-roboto"
+                className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl font-roboto"
               >
                 <ArrowLeft className="mr-2" size={20} />
                 Go Back / వెనుకకు వెళ్లు
